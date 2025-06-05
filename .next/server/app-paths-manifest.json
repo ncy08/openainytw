@@ -1,0 +1,5 @@
+{
+  "/api/realtime-token/route": "app/api/realtime-token/route.js",
+  "/not-found": "app/not-found.js",
+  "/voice-agent/page": "app/voice-agent/page.js"
+}

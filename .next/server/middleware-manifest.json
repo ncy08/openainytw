@@ -1,0 +1,26 @@
+{
+  "sortedMiddleware": [],
+  "middleware": {},
+  "functions": {
+    "/api/realtime-token/route": {
+      "files": [
+        "server/middleware-build-manifest.js",
+        "server/middleware-react-loadable-manifest.js",
+        "server/next-font-manifest.js",
+        "server/edge-runtime-webpack.js",
+        "server/app/api/realtime-token/route.js"
+      ],
+      "name": "app/api/realtime-token/route",
+      "page": "/api/realtime-token/route",
+      "matchers": [
+        {
+          "regexp": "^/api/realtime\\-token$",
+          "originalSource": "/api/realtime-token"
+        }
+      ],
+      "wasm": [],
+      "assets": []
+    }
+  },
+  "version": 2
+}
