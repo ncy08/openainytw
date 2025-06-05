@@ -13,6 +13,12 @@ CREATE TABLE IF NOT EXISTS image_generations (
   file_size_bytes INTEGER,
   width INTEGER,
   height INTEGER,
+  -- OpenAI Images endpoint specific metadata
+  size VARCHAR(16), -- e.g., "1024x1024", "1792x1024"
+  quality VARCHAR(16), -- "standard" or "hd"
+  style VARCHAR(16), -- "vivid" or "natural"
+  response_format VARCHAR(16), -- "url" or "b64_json"
+  n_images INTEGER DEFAULT 1, -- number of images requested
   meta JSONB
 );
 
