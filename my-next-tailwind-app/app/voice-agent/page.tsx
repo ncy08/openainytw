@@ -1,11 +1,35 @@
 "use client";
 
 import { Sidebar } from "@/components/ui/Sidebar";
-import VoiceAgent from "@/components/VoiceAgentClient";
-import React, { useState } from "react";
+import VoiceAgent, { VoiceAgentHandle } from "@/components/VoiceAgentClient";
+import React, { useRef, useState } from "react";
+import { Mic } from "lucide-react";
 
 export default function VoiceAgentPage() {
+  const agentRef = useRef<VoiceAgentHandle>(null);
   const [connected, setConnected] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  // For demo: fake volume levels
+  const [userLevel, setUserLevel] = useState(0.2);
+  const [agentLevel, setAgentLevel] = useState(0.1);
+
+  const handleConnect = () => {
+    setConnected(true);
+    setTimeout(() => {
+      agentRef.current?.startListening();
+      setIsActive(true);
+    }, 100); // ensure VoiceAgent is mounted
+  };
+
+  // TODO: Replace with real volume levels from VoiceAgent
+  React.useEffect(() => {
+    if (!isActive) return;
+    const interval = setInterval(() => {
+      setUserLevel(Math.random());
+      setAgentLevel(Math.random());
+    }, 400);
+    return () => clearInterval(interval);
+  }, [isActive]);
 
   return (
     <div className="min-h-screen flex bg-black text-white" style={{ backgroundImage: 'url(/stars.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
@@ -18,27 +42,63 @@ export default function VoiceAgentPage() {
           <p className="text-lg text-gray-200 mb-8 text-center max-w-xl">
             Edit images with your voice.
           </p>
-          <div
-            className="text-3xl font-semibold px-12 py-4 rounded-full animate-glow cursor-pointer select-none text-white"
-            style={{
-              textShadow: '0 0 16px #fff, 0 0 32px #0ff',
-              background: 'transparent',
-              boxShadow: 'none',
-              border: 'none',
-              outline: 'none',
-              transition: 'transform 0.2s',
-            }}
-            tabIndex={0}
-            role="button"
-            onClick={() => setConnected(true)}
-            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setConnected(true); }}
-          >
-            Connect
-          </div>
-          {connected && (
-            <div className="w-full mt-12 bg-black text-white">
-              <VoiceAgent />
+          {!connected && (
+            <div
+              className="text-3xl font-semibold px-12 py-4 rounded-full animate-glow cursor-pointer select-none text-white"
+              style={{
+                textShadow: '0 0 16px #fff, 0 0 32px #0ff',
+                background: 'transparent',
+                boxShadow: 'none',
+                border: 'none',
+                outline: 'none',
+                transition: 'transform 0.2s',
+              }}
+              tabIndex={0}
+              role="button"
+              onClick={handleConnect}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleConnect(); }}
+            >
+              Connect
             </div>
+          )}
+          {connected && (
+            <>
+              <div className="flex items-center gap-6 mb-8">
+                <div className="flex flex-col items-center gap-2">
+                  <span className="text-blue-400 text-xs">You</span>
+                  <div className="w-4 h-24 bg-gray-800 rounded-full overflow-hidden">
+                    <div 
+                      className="w-full bg-blue-400 transition-all duration-100"
+                      style={{ 
+                        height: `${Math.min(userLevel * 100, 100)}%`,
+                        marginTop: `${Math.max(100 - userLevel * 100, 0)}%`
+                      }} 
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <span className="text-purple-400 text-xs">Agent</span>
+                  <div className="w-4 h-24 bg-gray-800 rounded-full overflow-hidden">
+                    <div 
+                      className="w-full bg-purple-400 transition-all duration-100"
+                      style={{ 
+                        height: `${Math.min(agentLevel * 100, 100)}%`,
+                        marginTop: `${Math.max(100 - agentLevel * 100, 0)}%`
+                      }} 
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <span className="text-gray-400 text-xs">Mic</span>
+                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-900 border border-gray-700">
+                    <Mic className="text-cyan-400 w-8 h-8" />
+                  </div>
+                </div>
+              </div>
+              <div className="w-full mt-4 bg-black text-white">
+                <VoiceAgent ref={agentRef} />
+              </div>
+            </>
           )}
         </div>
       </main>
