@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const {
       prompt,
       size = "1024x1024",
-      quality = "standard",
+      quality = "low",
       style = "vivid",
     } = await request.json();
 

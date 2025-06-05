@@ -18,6 +18,9 @@ import { z } from "zod";
 export interface VoiceAgentHandle {
   startListening: () => void;
   stopListening: () => void;
+  mute: () => void;
+  unmute: () => void;
+  isMuted: () => boolean;
 }
 
 interface VoiceAgentProps {
@@ -92,6 +95,7 @@ const VoiceAgent = forwardRef<VoiceAgentHandle, VoiceAgentProps>(
     const [agentStatus, setAgentStatus] = useState<string>("Idle");
     const [transcript, setTranscript] = useState<string>("");
     const [error, setError] = useState<string>("");
+    const [isMuted, setIsMuted] = useState<boolean>(false);
 
     // Start microphone and stream audio to agent
     const startListening = async () => {
@@ -275,6 +279,7 @@ Avoid repeating back full image prompts. Only confirm details briefly if needed.
             const audioBlob = new Blob([event.data], { type: "audio/mpeg" });
             const url = URL.createObjectURL(audioBlob);
             audioPlayerRef.current.src = url;
+            audioPlayerRef.current.muted = isMuted;
             audioPlayerRef.current.play();
             setAgentStatus("Speaking...");
             audioPlayerRef.current.onended = () => {
@@ -306,7 +311,24 @@ Avoid repeating back full image prompts. Only confirm details briefly if needed.
       }
     };
 
-    useImperativeHandle(ref, () => ({ startListening, stopListening }), []);
+    // Expose methods to parent component
+    useImperativeHandle(ref, () => ({
+      startListening,
+      stopListening,
+      mute: () => {
+        setIsMuted(true);
+        if (audioPlayerRef.current) {
+          audioPlayerRef.current.muted = true;
+        }
+      },
+      unmute: () => {
+        setIsMuted(false);
+        if (audioPlayerRef.current) {
+          audioPlayerRef.current.muted = false;
+        }
+      },
+      isMuted: () => isMuted,
+    }));
 
     useEffect(() => {
       return () => {

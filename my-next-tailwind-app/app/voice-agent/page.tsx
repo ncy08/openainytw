@@ -2,7 +2,9 @@
 
 import { Sidebar } from "@/components/ui/Sidebar";
 import VoiceAgent, { VoiceAgentHandle } from "@/components/VoiceAgentClient";
+import { ImageModal } from "@/components/ui/ImageModal";
 import React, { useState, useRef } from "react";
+import { Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 
 export default function VoiceAgentPage() {
   const [connected, setConnected] = useState(false);
@@ -10,6 +12,8 @@ export default function VoiceAgentPage() {
   const [userLevel, setUserLevel] = useState(0.2);
   const [agentLevel, setAgentLevel] = useState(0.1);
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+  const [isMuted, setIsMuted] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const agentRef = useRef<VoiceAgentHandle>(null);
 
   const handleConnect = () => {
@@ -28,10 +32,30 @@ export default function VoiceAgentPage() {
     setAgentLevel(0.1);
   };
 
+  const handleMuteToggle = () => {
+    if (agentRef.current) {
+      if (isMuted) {
+        agentRef.current.unmute();
+        setIsMuted(false);
+      } else {
+        agentRef.current.mute();
+        setIsMuted(true);
+      }
+    }
+  };
+
   // Handle new images from Vee
   const handleImageGenerated = (imageUrl: string) => {
     console.log("🖼️ New image generated:", imageUrl);
     setGeneratedImages((prev) => [imageUrl, ...prev]);
+  };
+
+  const handleImageClick = (index: number) => {
+    setSelectedImageIndex(index);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedImageIndex(null);
   };
 
   return (
@@ -59,29 +83,56 @@ export default function VoiceAgentPage() {
             Create images with your voice using Vee, your AI creative assistant
           </p>
 
-          {/* OpenAI-style minimalist button */}
-          <button
-            className={`
-              relative px-8 py-4 rounded-full text-lg font-medium transition-all duration-300
-              ${
-                connected
-                  ? "bg-foreground text-background hover:bg-muted-foreground"
-                  : "bg-primary text-primary-foreground hover:bg-foreground hover:scale-105"
-              }
-              focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
-              active:scale-95
-            `}
-            onClick={connected ? handleDisconnect : handleConnect}
-          >
-            {connected ? (
-              <span className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-openai-pulse" />
-                Disconnect
-              </span>
-            ) : (
-              "Connect to Vee"
+          {/* Control buttons */}
+          <div className="flex items-center justify-center gap-4 mb-8">
+            {/* Main connect/disconnect button */}
+            <button
+              className={`
+                relative px-8 py-4 rounded-full text-lg font-medium transition-all duration-300
+                ${
+                  connected
+                    ? "bg-foreground text-background hover:bg-muted-foreground"
+                    : "bg-primary text-primary-foreground hover:bg-foreground hover:scale-105"
+                }
+                focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
+                active:scale-95
+              `}
+              onClick={connected ? handleDisconnect : handleConnect}
+            >
+              {connected ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-openai-pulse" />
+                  Disconnect
+                </span>
+              ) : (
+                "Connect to Vee"
+              )}
+            </button>
+
+            {/* Mute button - only show when connected */}
+            {connected && (
+              <button
+                onClick={handleMuteToggle}
+                className={`
+                  p-4 rounded-full transition-all duration-300
+                  ${
+                    isMuted
+                      ? "bg-red-500 text-white hover:bg-red-600"
+                      : "bg-secondary text-secondary-foreground hover:bg-muted"
+                  }
+                  focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
+                  active:scale-95
+                `}
+                title={isMuted ? "Unmute Vee" : "Mute Vee"}
+              >
+                {isMuted ? (
+                  <VolumeX className="w-5 h-5" />
+                ) : (
+                  <Volume2 className="w-5 h-5" />
+                )}
+              </button>
             )}
-          </button>
+          </div>
 
           {/* OpenAI-style audio level meters */}
           {connected && isActive && (
@@ -104,7 +155,7 @@ export default function VoiceAgentPage() {
 
               <div className="flex items-center gap-3">
                 <span className="text-muted-foreground text-sm font-medium">
-                  Vee
+                  Vee {isMuted && <VolumeX className="w-3 h-3 inline ml-1" />}
                 </span>
                 <div className="w-24 h-1.5 bg-secondary rounded-full overflow-hidden">
                   <div
@@ -143,7 +194,8 @@ export default function VoiceAgentPage() {
                 {generatedImages.map((imageUrl, index) => (
                   <div
                     key={index}
-                    className="group relative rounded-lg overflow-hidden bg-card border border-border hover:border-ring/50 transition-all duration-300 hover:scale-[1.02]"
+                    className="group relative rounded-lg overflow-hidden bg-card border border-border hover:border-ring/50 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                    onClick={() => handleImageClick(index)}
                   >
                     <div className="aspect-square overflow-hidden bg-secondary">
                       <img
@@ -169,6 +221,17 @@ export default function VoiceAgentPage() {
             </div>
           )}
         </div>
+
+        {/* Image Modal */}
+        {selectedImageIndex !== null && (
+          <ImageModal
+            isOpen={selectedImageIndex !== null}
+            onClose={handleCloseModal}
+            imageUrl={generatedImages[selectedImageIndex]}
+            imageIndex={selectedImageIndex}
+            totalImages={generatedImages.length}
+          />
+        )}
       </div>
     </div>
   );
