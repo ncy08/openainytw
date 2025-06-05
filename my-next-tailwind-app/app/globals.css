@@ -1,0 +1,206 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* OpenAI Brand Colors - 2025 Guidelines */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* OpenAI Brand-specific colors */
+  --color-openai-black: #000000;
+  --color-openai-white: #ffffff;
+  --color-openai-gray-50: #f8f9fa;
+  --color-openai-gray-100: #f1f3f4;
+  --color-openai-gray-200: #e8eaed;
+  --color-openai-gray-300: #dadce0;
+  --color-openai-gray-400: #9aa0a6;
+  --color-openai-gray-500: #5f6368;
+  --color-openai-gray-600: #3c4043;
+  --color-openai-gray-700: #202124;
+  --color-openai-gray-800: #171717;
+  --color-openai-gray-900: #0f0f0f;
+  --color-openai-blue: #2563eb;
+  --color-openai-blue-light: #3b82f6;
+  --color-openai-blue-subtle: #dbeafe;
+}
+
+:root {
+  --radius: 8px;
+
+  /* OpenAI Light Theme */
+  --background: #ffffff;
+  --foreground: #0f0f0f;
+  --card: #ffffff;
+  --card-foreground: #0f0f0f;
+  --popover: #ffffff;
+  --popover-foreground: #0f0f0f;
+  --primary: #0f0f0f;
+  --primary-foreground: #ffffff;
+  --secondary: #f8f9fa;
+  --secondary-foreground: #0f0f0f;
+  --muted: #f8f9fa;
+  --muted-foreground: #5f6368;
+  --accent: #f1f3f4;
+  --accent-foreground: #0f0f0f;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #e8eaed;
+  --input: #e8eaed;
+  --ring: #2563eb;
+
+  /* OpenAI Sidebar Colors */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0f0f0f;
+  --sidebar-primary: #2563eb;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f8f9fa;
+  --sidebar-accent-foreground: #0f0f0f;
+  --sidebar-border: #e8eaed;
+  --sidebar-ring: #2563eb;
+
+  /* Charts */
+  --chart-1: #2563eb;
+  --chart-2: #3b82f6;
+  --chart-3: #60a5fa;
+  --chart-4: #93c5fd;
+  --chart-5: #dbeafe;
+}
+
+.dark {
+  /* OpenAI Dark Theme */
+  --background: #0f0f0f;
+  --foreground: #ffffff;
+  --card: #171717;
+  --card-foreground: #ffffff;
+  --popover: #171717;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #0f0f0f;
+  --secondary: #202124;
+  --secondary-foreground: #ffffff;
+  --muted: #202124;
+  --muted-foreground: #9aa0a6;
+  --accent: #3c4043;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #3c4043;
+  --input: #3c4043;
+  --ring: #3b82f6;
+
+  /* OpenAI Dark Sidebar */
+  --sidebar: #171717;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #202124;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #3c4043;
+  --sidebar-ring: #3b82f6;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* OpenAI Brand Typography */
+@layer utilities {
+  .text-openai-heading {
+    @apply text-foreground font-medium tracking-tight;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  .text-openai-body {
+    @apply text-muted-foreground leading-relaxed;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  .bg-openai-gradient {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  }
+
+  .dark .bg-openai-gradient {
+    background: linear-gradient(135deg, #171717 0%, #0f0f0f 100%);
+  }
+
+  .bg-openai-blue-gradient {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  }
+
+  .dark .bg-openai-blue-gradient {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+  }
+}
+
+/* OpenAI Brand Animations */
+@keyframes openai-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes openai-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(37, 99, 235, 0.5);
+  }
+}
+
+.animate-openai-pulse {
+  animation: openai-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-openai-glow {
+  animation: openai-glow 3s ease-in-out infinite;
+}
