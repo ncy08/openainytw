@@ -160,33 +160,6 @@ function GenerationTypePieChart({ sizes }: { sizes: { size: string, count: numbe
   )
 }
 
-function MonthlyTrendsChart({ monthly }: { monthly: { month: string, count: number }[] }) {
-  // Bar chart for monthly breakdown
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Monthly Trends</CardTitle>
-        <CardDescription>GPT-Image-1 generations (last 6 months)</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
-          <BarChart data={monthly}>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-            />
-            <ChartTooltip content={<ChartTooltipContent />} />
-            <Bar dataKey="count" fill="var(--color-images)" radius={4} />
-          </BarChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
-  )
-}
-
 function DailyUsageChart() {
   return (
     <Card>
@@ -319,13 +292,14 @@ export default function AnalyticsPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const userId = "user_001";
 
   useEffect(() => {
     async function fetchAnalytics() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("/api/analytics/images");
+        const res = await fetch(`/api/analytics/images?user_id=${userId}`);
         const json = await res.json();
         setData(json);
       } catch (err) {
@@ -343,7 +317,7 @@ export default function AnalyticsPage() {
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h2>
+        <h2 className="text-3xl font-bold tracking-tight">My Analytics</h2>
         <div className="flex items-center space-x-2">
           <Badge variant="outline" className="text-xs">
             <Calendar className="mr-1 h-3 w-3" />
@@ -351,6 +325,7 @@ export default function AnalyticsPage() {
           </Badge>
         </div>
       </div>
+      <div className="text-muted-foreground text-sm mb-2">User ID: {userId}</div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -388,24 +363,14 @@ export default function AnalyticsPage() {
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="trends">Trends</TabsTrigger>
           <TabsTrigger value="quality">Quality</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <div className="col-span-4">
-              <MonthlyTrendsChart monthly={data.monthly} />
-            </div>
             <div className="col-span-3">
               <GenerationTypePieChart sizes={data.sizes} />
             </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="trends" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-1">
-            <MonthlyTrendsChart monthly={data.monthly} />
           </div>
         </TabsContent>
 
