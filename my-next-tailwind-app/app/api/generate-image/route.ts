@@ -28,34 +28,23 @@ export async function POST(request: NextRequest) {
       style,
     });
 
-    // Create a detailed prompt that incorporates the quality and style preferences
-    const enhancedPrompt = `Create a ${
-      quality === "hd" ? "high-quality, detailed" : "standard quality"
-    } image with a ${style} artistic style. ${prompt}`;
+    // Create a detailed prompt that incorporates the style preferences
+    const enhancedPrompt = `Create an image with a ${style} artistic style. ${prompt}`;
 
-    const response = await openai.responses.create({
+    // Map quality parameters from DALL-E format to GPT Image 1 format
+    const gptImageQuality = quality === "hd" ? "high" : "medium";
+
+    const response = await openai.images.generate({
       model: "gpt-image-1",
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: enhancedPrompt,
-            },
-          ],
-        },
-      ],
-      modalities: ["text", "image"],
-      max_completion_tokens: 2000,
+      prompt: enhancedPrompt,
+      size: size as "1024x1024" | "1536x1024" | "1024x1536",
+      quality: gptImageQuality as "low" | "medium" | "high" | "auto",
     });
 
-    // Extract the image from the response
-    const imageContent = response.choices[0]?.message?.content?.find(
-      (item) => item.type === "image"
-    );
+    // Extract the image from the response (Images API format)
+    const imageData = response.data[0];
 
-    if (!imageContent || imageContent.type !== "image") {
+    if (!imageData?.b64_json) {
       return NextResponse.json(
         { error: "No image generated in response" },
         { status: 500 }
@@ -63,14 +52,10 @@ export async function POST(request: NextRequest) {
     }
 
     // The image is returned as base64 data
-    const imageUrl = `data:image/png;base64,${imageContent.image}`;
+    const imageUrl = `data:image/png;base64,${imageData.b64_json}`;
 
-    // Get any text response as the "revised prompt"
-    const textContent = response.choices[0]?.message?.content?.find(
-      (item) => item.type === "text"
-    );
-    const revisedPrompt =
-      textContent?.type === "text" ? textContent.text : null;
+    // GPT Image 1 may provide a revised prompt
+    const revisedPrompt = imageData.revised_prompt || null;
 
     console.log("✅ Image generated successfully with GPT Image 1");
 
