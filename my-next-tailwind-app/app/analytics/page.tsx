@@ -3,6 +3,7 @@
 import { TrendingUp, TrendingDown, Users, Image, Video, Music, Zap, Calendar } from "lucide-react"
 import { Pie, PieChart, Bar, BarChart, Line, LineChart, Area, AreaChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
 import React, { useEffect, useState } from "react";
+import { BarChart as ReBarChart, Bar as ReBar, XAxis as ReXAxis, YAxis as ReYAxis, Tooltip as ReTooltip, ResponsiveContainer as ReResponsiveContainer } from "recharts";
 
 import {
   Card,
@@ -288,6 +289,88 @@ function QualityPieChart({ qualities }: { qualities: { quality: string, count: n
   )
 }
 
+function PromptsAnalytics({ userId }: { userId: string }) {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchPrompts() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(`/api/analytics/prompts?user_id=${userId}`);
+        const json = await res.json();
+        setData(json);
+      } catch (err) {
+        setError("Failed to fetch prompt analytics");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPrompts();
+  }, [userId]);
+
+  if (loading) return <div className="p-4">Loading prompt analytics…</div>;
+  if (error || !data?.success) return <div className="p-4 text-red-500">Error loading prompt analytics.</div>;
+
+  return (
+    <div className="mt-8">
+      <h3 className="text-xl font-bold mb-2">Top Prompts</h3>
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Bar Chart */}
+        <div className="bg-card rounded-lg p-4 shadow">
+          <div className="font-semibold mb-2">Bar Chart</div>
+          <ReResponsiveContainer width="100%" height={220}>
+            <ReBarChart data={data.prompts} layout="vertical" margin={{ left: 24, right: 24, top: 8, bottom: 8 }}>
+              <ReXAxis type="number" allowDecimals={false} hide />
+              <ReYAxis dataKey="prompt" type="category" width={180} tick={{ fontSize: 12 }} />
+              <ReTooltip />
+              <ReBar dataKey="count" fill="var(--color-images, #6366f1)" radius={6} />
+            </ReBarChart>
+          </ReResponsiveContainer>
+        </div>
+        {/* List */}
+        <div className="bg-card rounded-lg p-4 shadow">
+          <div className="font-semibold mb-2">Prompt List</div>
+          <ol className="list-decimal ml-6 space-y-1">
+            {data.prompts.map((row: any, i: number) => (
+              <li key={row.prompt} className="truncate">
+                <span className="font-mono text-sm">{row.prompt}</span>
+                <span className="ml-2 text-muted-foreground">({row.count})</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+      <div className="mt-6 grid md:grid-cols-2 gap-6">
+        {/* Styles */}
+        <div className="bg-card rounded-lg p-4 shadow">
+          <div className="font-semibold mb-2">Most Common Styles</div>
+          <div className="flex flex-wrap gap-2">
+            {data.styles.map((row: any) => (
+              <span key={row.style} className="inline-block bg-muted px-2 py-1 rounded text-xs font-mono">
+                {row.style || "(none)"} <span className="text-muted-foreground">({row.count})</span>
+              </span>
+            ))}
+          </div>
+        </div>
+        {/* Qualities */}
+        <div className="bg-card rounded-lg p-4 shadow">
+          <div className="font-semibold mb-2">Most Common Qualities</div>
+          <div className="flex flex-wrap gap-2">
+            {data.qualities.map((row: any) => (
+              <span key={row.quality} className="inline-block bg-muted px-2 py-1 rounded text-xs font-mono">
+                {row.quality || "(none)"} <span className="text-muted-foreground">({row.count})</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AnalyticsPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -380,6 +463,9 @@ export default function AnalyticsPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Prompts Analytics Section */}
+      <PromptsAnalytics userId={userId} />
     </div>
   );
 } 

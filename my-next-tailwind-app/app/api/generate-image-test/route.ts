@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       const width = size.split("x")[0];
       const height = size.split("x")[1];
 
+      // Insert into image_generations
       const result = await pool.query(
         `INSERT INTO image_generations 
           (user_id, prompt, image_url, created_at, model, provider, status, duration_ms, file_size_bytes, width, height, size, quality, style, response_format, n_images)
@@ -39,6 +40,13 @@ export async function POST(req: NextRequest) {
         [userId, prompt, image_url, duration_ms, width, height, size, quality, style, response_format, n_images]
       );
       insertedRows.push(result.rows[0]);
+
+      // Also insert into user_prompts
+      await pool.query(
+        `INSERT INTO user_prompts (user_id, prompt, model, style, quality, used_at)
+         VALUES ($1, $2, $3, $4, $5, NOW())`,
+        [userId, prompt, 'gpt-image-1', style, quality]
+      );
     }
 
     return NextResponse.json({ success: true, rows: insertedRows });

@@ -115,6 +115,17 @@ CREATE TABLE IF NOT EXISTS users (
   preferred_models JSONB
 );
 
+-- User Prompts Table
+CREATE TABLE IF NOT EXISTS user_prompts (
+  id SERIAL PRIMARY KEY,
+  user_id VARCHAR(64) NOT NULL,
+  prompt TEXT NOT NULL,
+  model VARCHAR(64),
+  style VARCHAR(16),
+  quality VARCHAR(16),
+  used_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 -- Indexes for analytics performance
 CREATE INDEX IF NOT EXISTS idx_image_generations_user_id ON image_generations(user_id);
 CREATE INDEX IF NOT EXISTS idx_image_generations_created_at ON image_generations(created_at);
@@ -141,4 +152,7 @@ CREATE INDEX IF NOT EXISTS idx_user_interactions_session_id ON user_interactions
 CREATE INDEX IF NOT EXISTS idx_user_interactions_type ON user_interactions(type);
 CREATE INDEX IF NOT EXISTS idx_user_interactions_created_at ON user_interactions(created_at);
 
-CREATE INDEX IF NOT EXISTS idx_daily_analytics_date ON daily_analytics(date); 
+CREATE INDEX IF NOT EXISTS idx_daily_analytics_date ON daily_analytics(date);
+
+CREATE INDEX IF NOT EXISTS idx_user_prompts_user_id ON user_prompts(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_prompts_prompt ON user_prompts(prompt); 
