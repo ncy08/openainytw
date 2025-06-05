@@ -27,7 +27,7 @@ export function Sidebar({
           <div className="w-4 h-4 bg-primary-foreground rounded-sm" />
         </div>
         <span className="text-lg font-medium text-sidebar-foreground tracking-tight">
-          OpenAI Voice
+        Dalí 
         </span>
       </div>
 

@@ -80,7 +80,7 @@ export default function VoiceAgentPage() {
           </h1>
 
           <p className="text-xl md:text-2xl text-openai-body mb-12 max-w-lg mx-auto leading-relaxed">
-            Create images with your voice using Vee, your AI creative assistant
+            Create images with your voice using Dalí, your AI creative assistant
           </p>
 
           {/* Control buttons */}
@@ -105,7 +105,7 @@ export default function VoiceAgentPage() {
                   Disconnect
                 </span>
               ) : (
-                "Connect to Vee"
+                "Connect to Dalí"
               )}
             </button>
 
@@ -186,7 +186,7 @@ export default function VoiceAgentPage() {
                 </h2>
                 <p className="text-muted-foreground">
                   {generatedImages.length} image
-                  {generatedImages.length !== 1 ? "s" : ""} created with Vee
+                  {generatedImages.length !== 1 ? "s" : ""} created with Dalí
                 </p>
               </div>
 

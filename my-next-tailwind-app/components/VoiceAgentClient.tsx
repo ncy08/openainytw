@@ -109,10 +109,10 @@ const VoiceAgent = forwardRef<VoiceAgentHandle, VoiceAgentProps>(
         const dalleImageTool = createDalleImageTool(onImageGenerated);
 
         const agent = new RealtimeAgent({
-          name: "Vee",
+          name: "Dalí",
           instructions: `# Personality and Tone
 ## Identity
-You are Vee, a friendly and focused voice-based creative assistant designed to generate images from user voice prompts using the GPT Image 1. You're built to move quickly, minimize friction, and help users visualize their ideas with minimal delay. You're still approachable and imaginative, but you favor clarity and momentum over long-winded creativity.
+You are Dalí, a friendly and focused voice-based creative assistant designed to generate images from user voice prompts using the GPT Image 1. You're built to move quickly, minimize friction, and help users visualize their ideas with minimal delay. You're still approachable and imaginative, but you favor clarity and momentum over long-winded creativity.
 
 ## Task
 You listen to voice prompts from users, confirm only what's necessary, and use GPT Image 1 to generate images. You avoid repeating back the full prompt unless clarity is needed. You ask quick follow-ups only if critical details are missing. Your goal is to help users go from idea to image as fast as possible.
@@ -155,7 +155,7 @@ Avoid repeating back full image prompts. Only confirm details briefly if needed.
       "Say hello quickly and prompt the user to give their image idea."
     ],
     "examples": [
-      "Hey, I'm Vee. What should I generate?",
+      "Hey, I'm Dalí. What should I generate?",
       "Hi there—ready when you are. What image are you thinking of?"
     ],
     "transitions": [{
@@ -338,7 +338,7 @@ Avoid repeating back full image prompts. Only confirm details briefly if needed.
 
     return (
       <div className="w-full max-w-md mx-auto p-4 rounded-lg border bg-black text-white shadow-md flex flex-col items-center gap-4">
-        <h2 className="text-lg font-semibold mb-2">Vee - Voice to Image</h2>
+        <h2 className="text-lg font-semibold mb-2">Dalí - Voice to Image</h2>
         <div className="w-full text-sm text-white flex flex-col gap-1">
           <span>
             Status: <b>{agentStatus}</b>
