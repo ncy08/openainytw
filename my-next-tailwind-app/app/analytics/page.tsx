@@ -2,6 +2,7 @@
 
 import { TrendingUp, TrendingDown, Users, Image, Video, Music, Zap, Calendar } from "lucide-react"
 import { Pie, PieChart, Bar, BarChart, Line, LineChart, Area, AreaChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
+import React, { useEffect, useState } from "react";
 
 import {
   Card,
@@ -114,12 +115,18 @@ function StatsCard({ title, value, change, icon: Icon, trend }: {
   )
 }
 
-function GenerationTypePieChart() {
+function GenerationTypePieChart({ sizes }: { sizes: { size: string, count: number }[] }) {
+  // Pie chart for image size breakdown
+  const data = sizes.map((s, i) => ({
+    type: s.size || 'unknown',
+    count: Number(s.count),
+    fill: `var(--chart-${(i % 5) + 1})`,
+  }));
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Generation Types</CardTitle>
-        <CardDescription>Distribution by content type</CardDescription>
+        <CardTitle>Image Size Distribution</CardTitle>
+        <CardDescription>By requested size</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -132,7 +139,7 @@ function GenerationTypePieChart() {
               content={<ChartTooltipContent hideLabel />}
             />
             <Pie 
-              data={generationTypeData} 
+              data={data} 
               dataKey="count" 
               nameKey="type"
               innerRadius={60}
@@ -143,26 +150,27 @@ function GenerationTypePieChart() {
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 leading-none font-medium">
-          Images leading with 63% share <TrendingUp className="h-4 w-4" />
+          {data.length > 0 ? `${data[0].type} most popular` : 'No data'} <TrendingUp className="h-4 w-4" />
         </div>
         <div className="text-muted-foreground leading-none">
-          Total generations: {generationTypeData.reduce((sum, item) => sum + item.count, 0)}
+          Total generations: {data.reduce((sum, item) => sum + item.count, 0)}
         </div>
       </CardFooter>
     </Card>
   )
 }
 
-function MonthlyTrendsChart() {
+function MonthlyTrendsChart({ monthly }: { monthly: { month: string, count: number }[] }) {
+  // Bar chart for monthly breakdown
   return (
     <Card>
       <CardHeader>
         <CardTitle>Monthly Trends</CardTitle>
-        <CardDescription>Generation activity over the last 6 months</CardDescription>
+        <CardDescription>GPT-Image-1 generations (last 6 months)</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <BarChart data={monthlyData}>
+          <BarChart data={monthly}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="month"
@@ -171,9 +179,7 @@ function MonthlyTrendsChart() {
               axisLine={false}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
-            <Bar dataKey="images" fill="var(--color-images)" radius={4} />
-            <Bar dataKey="videos" fill="var(--color-videos)" radius={4} />
-            <Bar dataKey="audio" fill="var(--color-audio)" radius={4} />
+            <Bar dataKey="count" fill="var(--color-images)" radius={4} />
           </BarChart>
         </ChartContainer>
       </CardContent>
@@ -264,7 +270,76 @@ function ModelUsageChart() {
   )
 }
 
+function QualityPieChart({ qualities }: { qualities: { quality: string, count: number }[] }) {
+  // Pie chart for quality breakdown
+  const data = qualities.map((q, i) => ({
+    type: q.quality || 'unknown',
+    count: Number(q.count),
+    fill: `var(--chart-${(i % 5) + 1})`,
+  }));
+  return (
+    <Card className="flex flex-col">
+      <CardHeader className="items-center pb-0">
+        <CardTitle>Quality Distribution</CardTitle>
+        <CardDescription>By requested quality</CardDescription>
+      </CardHeader>
+      <CardContent className="flex-1 pb-0">
+        <ChartContainer
+          config={chartConfig}
+          className="mx-auto aspect-square max-h-[250px]"
+        >
+          <PieChart>
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
+            />
+            <Pie 
+              data={data} 
+              dataKey="count" 
+              nameKey="type"
+              innerRadius={60}
+              strokeWidth={5}
+            />
+          </PieChart>
+        </ChartContainer>
+      </CardContent>
+      <CardFooter className="flex-col gap-2 text-sm">
+        <div className="flex items-center gap-2 leading-none font-medium">
+          {data.length > 0 ? `${data[0].type} most popular` : 'No data'} <TrendingUp className="h-4 w-4" />
+        </div>
+        <div className="text-muted-foreground leading-none">
+          Total generations: {data.reduce((sum, item) => sum + item.count, 0)}
+        </div>
+      </CardFooter>
+    </Card>
+  )
+}
+
 export default function AnalyticsPage() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchAnalytics() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/analytics/images");
+        const json = await res.json();
+        setData(json);
+      } catch (err) {
+        setError("Failed to fetch analytics");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAnalytics();
+  }, []);
+
+  if (loading) return <div className="p-8 text-lg">Loading analytics…</div>;
+  if (error || !data?.success) return <div className="p-8 text-red-500">Error loading analytics.</div>;
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
@@ -272,7 +347,7 @@ export default function AnalyticsPage() {
         <div className="flex items-center space-x-2">
           <Badge variant="outline" className="text-xs">
             <Calendar className="mr-1 h-3 w-3" />
-            Last 30 days
+            Last 6 months
           </Badge>
         </div>
       </div>
@@ -280,32 +355,32 @@ export default function AnalyticsPage() {
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
-          title="Total Generations"
-          value="1,968"
-          change="+12.5%"
+          title="Total GPT-Image-1 Generations"
+          value={data.total?.toLocaleString() ?? "0"}
+          change={"+0%"}
           icon={Zap}
           trend="up"
         />
         <StatsCard
-          title="Active Users"
-          value="342"
-          change="+8.2%"
-          icon={Users}
-          trend="up"
-        />
-        <StatsCard
-          title="Images Created"
-          value="1,247"
-          change="+15.3%"
+          title="Average Duration (ms)"
+          value={Math.round(data.avgDuration).toLocaleString()}
+          change={"-"}
           icon={Image}
           trend="up"
         />
         <StatsCard
-          title="Videos Generated"
-          value="432"
-          change="-2.1%"
-          icon={Video}
-          trend="down"
+          title="Most Popular Size"
+          value={data.sizes?.[0]?.size || "-"}
+          change={"-"}
+          icon={Image}
+          trend="up"
+        />
+        <StatsCard
+          title="Most Popular Quality"
+          value={data.qualities?.[0]?.quality || "-"}
+          change={"-"}
+          icon={Image}
+          trend="up"
         />
       </div>
 
@@ -314,70 +389,32 @@ export default function AnalyticsPage() {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="trends">Trends</TabsTrigger>
-          <TabsTrigger value="models">Models</TabsTrigger>
+          <TabsTrigger value="quality">Quality</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
             <div className="col-span-4">
-              <MonthlyTrendsChart />
+              <MonthlyTrendsChart monthly={data.monthly} />
             </div>
             <div className="col-span-3">
-              <GenerationTypePieChart />
-            </div>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <div className="col-span-4">
-              <DailyUsageChart />
-            </div>
-            <div className="col-span-3">
-              <ModelUsageChart />
+              <GenerationTypePieChart sizes={data.sizes} />
             </div>
           </div>
         </TabsContent>
 
         <TabsContent value="trends" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-1">
-            <MonthlyTrendsChart />
-            <DailyUsageChart />
+            <MonthlyTrendsChart monthly={data.monthly} />
           </div>
         </TabsContent>
 
-        <TabsContent value="models" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <ModelUsageChart />
-            <Card>
-              <CardHeader>
-                <CardTitle>Model Performance</CardTitle>
-                <CardDescription>Average generation time by provider</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-chart-1 rounded-full"></div>
-                    <span className="text-sm">GPT-4 Vision</span>
-                  </div>
-                  <span className="text-sm font-medium">2.3s avg</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-chart-2 rounded-full"></div>
-                    <span className="text-sm">Replicate</span>
-                  </div>
-                  <span className="text-sm font-medium">4.7s avg</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-chart-3 rounded-full"></div>
-                    <span className="text-sm">Fal AI</span>
-                  </div>
-                  <span className="text-sm font-medium">3.1s avg</span>
-                </div>
-              </CardContent>
-            </Card>
+        <TabsContent value="quality" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-1">
+            <QualityPieChart qualities={data.qualities} />
           </div>
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 } 
